@@ -99,3 +99,15 @@ county_data = add_new(county_data)
 layer = alt.layer(line_rolling, bars, data=county_data).interactive()
 st.altair_chart(layer, use_container_width=True)
 st.write(county_data[display_columns])
+
+
+
+
+
+st.sidebar.markdown("---")
+st.sidebar.markdown(
+"""
+[<img src='https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png' class='img-fluid' width=50 height=50>]
+(https://github.com/rsglick/covid19_dashboard) <small> Dashboard Beta </small>""",
+unsafe_allow_html=True,
+)
