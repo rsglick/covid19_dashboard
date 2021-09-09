@@ -52,8 +52,8 @@ def load_data() -> (pd.DataFrame, pd.DataFrame, pd.DataFrame):
 
 us_data, us_states_data, us_counties_data = load_data()
 
-st.sidebar.write(f'Total Cases: {us_data.loc[:, "cases"].max()}')
-st.sidebar.write(f'Total Deaths: {us_data.loc[:, "deaths"].max()}')
+st.sidebar.metric(label='Total Cases', value=us_data.loc[:, "cases"].max(), delta=us_data.loc[:, "new_cases"].iloc[-1])
+st.sidebar.metric(label='Total Deaths', value=us_data.loc[:, "deaths"].max(), delta=us_data.loc[:, "new_deaths"].iloc[-1])
 
 
 display_columns = ['date', 'cases', "deaths", 'new_cases', 'new_deaths']
