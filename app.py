@@ -6,15 +6,25 @@ import streamlit as st
 
 sns.set()
 
+
+
+st.set_page_config(
+    page_title="USA COVID-19 Dashboard",
+    # page_icon=":)",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+
 st.title('USA COVID-19 Dashboard')
 metric = st.sidebar.selectbox('Cases/Deaths:',['cases','deaths'])
 
 def add_new(df):
-    df['new_cases'] = df['cases'].diff()
-    df['new_deaths'] = df['deaths'].diff()
+    df.loc[:, 'new_cases'] = df.loc[:, 'cases'].diff()
+    df.loc[:, 'new_deaths'] = df.loc[:, 'deaths'].diff()
     
-    df['new_cases_rolling_mean'] = df['new_cases'].rolling(7).mean()
-    df['new_deaths_rolling_mean'] = df['new_deaths'].rolling(7).mean()
+    df.loc[:, 'new_cases_rolling_mean'] = df.loc[:, 'new_cases'].rolling(7).mean()
+    df.loc[:, 'new_deaths_rolling_mean'] = df.loc[:, 'new_deaths'].rolling(7).mean()
     df = df.fillna(0)
 
     df = df.astype({'cases':int, 'deaths':int, 'new_cases':int, 'new_deaths':int, 'new_cases_rolling_mean':int, 'new_deaths_rolling_mean':int})
@@ -27,23 +37,23 @@ def load_data() -> (pd.DataFrame, pd.DataFrame, pd.DataFrame):
     us_states_data_url   = 'https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv'
     us_counties_data_url = 'https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv'
 
-    df_us_data          = pd.read_csv(us_data_url)
-    df_us_data['date']  = pd.to_datetime(df_us_data['date'])
+    df_us_data                 = pd.read_csv(us_data_url)
+    df_us_data.loc[:, 'date']  = pd.to_datetime(df_us_data.loc[:, 'date'])
 
-    df_us_states_data          = pd.read_csv(us_states_data_url)
-    df_us_states_data['date']  = pd.to_datetime(df_us_states_data['date'])
+    df_us_states_data                 = pd.read_csv(us_states_data_url)
+    df_us_states_data.loc[:, 'date']  = pd.to_datetime(df_us_states_data.loc[:, 'date'])
 
     
-    df_us_counties_data          = pd.read_csv(us_counties_data_url)
-    df_us_counties_data['date']  = pd.to_datetime(df_us_counties_data['date'])
+    df_us_counties_data                 = pd.read_csv(us_counties_data_url)
+    df_us_counties_data.loc[:, 'date']  = pd.to_datetime(df_us_counties_data.loc[:, 'date'])
 
 
     return (df_us_data, df_us_states_data, df_us_counties_data)
 
 us_data, us_states_data, us_counties_data = load_data()
 
-st.sidebar.write(f'Total Cases: {us_data["cases"].max()}')
-st.sidebar.write(f'Total Deaths: {us_data["deaths"].max()}')
+st.sidebar.write(f'Total Cases: {us_data.loc[:, "cases"].max()}')
+st.sidebar.write(f'Total Deaths: {us_data.loc[:, "deaths"].max()}')
 
 
 display_columns = ['date', 'cases', "deaths", 'new_cases', 'new_deaths']
@@ -77,7 +87,7 @@ st.write(us_data[display_columns])
 
 
 st.write('State trends')
-state_choice = st.selectbox('Select', sorted(us_states_data['state'].unique()))
+state_choice = st.selectbox('Select', sorted(us_states_data.loc[:, 'state'].unique()))
 
 condition = us_states_data['state'] == state_choice
 state_data = us_states_data[condition]
@@ -89,7 +99,7 @@ st.write(state_data[display_columns])
 
 
 st.write('County trends')
-county_state_conditon = us_counties_data['state'] == state_choice
+county_state_conditon = us_counties_data.loc[:, 'state'] == state_choice
 county_choice = st.selectbox('Select', sorted(us_counties_data[county_state_conditon]['county'].unique()))
 
 condition = (county_state_conditon) &  (us_counties_data[county_state_conditon]['county'] == county_choice)
