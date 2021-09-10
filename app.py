@@ -30,7 +30,7 @@ def add_new(df):
     df = df.astype({'cases':int, 'deaths':int, 'new_cases':int, 'new_deaths':int, 'new_cases_rolling_mean':int, 'new_deaths_rolling_mean':int})
     return df    
 
-@st.cache(allow_output_mutation=True)
+@st.cache(allow_output_mutation=True, ttl=3*60*60)
 def load_data() -> (pd.DataFrame, pd.DataFrame, pd.DataFrame):
     DATA_SOURCE_URL      = 'https://github.com/nytimes/covid-19-data'
     us_data_url          = 'https://raw.githubusercontent.com/nytimes/covid-19-data/master/us.csv'
@@ -51,9 +51,10 @@ def load_data() -> (pd.DataFrame, pd.DataFrame, pd.DataFrame):
     return (df_us_data, df_us_states_data, df_us_counties_data)
 
 us_data, us_states_data, us_counties_data = load_data()
+us_data = add_new(us_data)
 
-st.sidebar.metric(label='Total Cases', value=us_data.loc[:, "cases"].max(), delta=us_data.loc[:, "new_cases"].iloc[-1])
-st.sidebar.metric(label='Total Deaths', value=us_data.loc[:, "deaths"].max(), delta=us_data.loc[:, "new_deaths"].iloc[-1])
+st.sidebar.metric(label='Total Cases', value=us_data.loc[:, "cases"].max(), delta=int(us_data.loc[:, "new_cases"].iloc[-1]))
+st.sidebar.metric(label='Total Deaths', value=us_data.loc[:, "deaths"].max(), delta=int(us_data.loc[:, "new_deaths"].iloc[-1]))
 
 
 display_columns = ['date', 'cases', "deaths", 'new_cases', 'new_deaths']
@@ -75,10 +76,10 @@ line_rolling = alt.Chart().mark_line(
     tooltip=['date', f'new_{metric}_rolling_mean']
 )
 
-us_data = add_new(us_data)
 layer = alt.layer(line_rolling, bars, data=us_data).interactive()
 st.altair_chart(layer, use_container_width=True)
-st.write(us_data[display_columns])
+if st.checkbox('Show raw data', key=1):
+    st.write(us_data[display_columns])
 
 
 
@@ -95,7 +96,8 @@ state_data = add_new(state_data)
 
 layer = alt.layer(line_rolling, bars, data=state_data).interactive()
 st.altair_chart(layer, use_container_width=True)
-st.write(state_data[display_columns])
+if st.checkbox('Show raw data', key=2):
+    st.write(state_data[display_columns])
 
 
 st.write('County trends')
@@ -108,7 +110,8 @@ county_data = add_new(county_data)
 
 layer = alt.layer(line_rolling, bars, data=county_data).interactive()
 st.altair_chart(layer, use_container_width=True)
-st.write(county_data[display_columns])
+if st.checkbox('Show raw data', key=3):
+    st.write(county_data[display_columns])
 
 
 
