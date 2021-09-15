@@ -10,13 +10,11 @@ sns.set()
 st.set_page_config(
     page_title="USA COVID-19 Dashboard",
     # page_icon=":)",
-    layout="wide",
-    initial_sidebar_state="expanded",
+    # layout="wide",
+    initial_sidebar_state="collapsed",
 )
 
 
-st.title("USA COVID-19 Dashboard")
-metric = st.sidebar.selectbox("Cases/Deaths:", ["cases", "deaths"])
 
 
 def add_new(df):
@@ -70,16 +68,21 @@ def load_data() -> (pd.DataFrame, pd.DataFrame, pd.DataFrame):
 us_data, us_states_data, us_counties_data = load_data()
 us_data = add_new(us_data)
 
-st.sidebar.metric(
+st.title("USA COVID-19 Dashboard")
+metric = st.selectbox("Cases/Deaths:", ["cases", "deaths"])
+
+cols = st.columns(2)
+cols[0].metric(
     label="Total Cases",
     value=int(us_data.loc[:, "cases"].max()),
     delta=int(us_data.loc[:, "new_cases"].iloc[-1]),
 )
-st.sidebar.metric(
+cols[1].metric(
     label="Total Deaths",
     value=int(us_data.loc[:, "deaths"].max()),
     delta=int(us_data.loc[:, "new_deaths"].iloc[-1]),
 )
+
 
 
 display_columns = ["date", "cases", "deaths", "new_cases", "new_deaths"]
@@ -99,7 +102,7 @@ line_rolling = (
     .mark_line(color="red", size=3)
     .encode(
         x="date:T",
-        y=alt.Y(f"new_{metric}_rolling_mean:Q", axis=alt.Axis(labels=False)),
+        y=alt.Y(f"new_{metric}_rolling_mean:Q", axis=alt.Axis(title=metric)),
         tooltip=["date", f"new_{metric}_rolling_mean"],
     )
 )
@@ -141,8 +144,8 @@ if st.checkbox("Show raw data", key=3):
     st.write(county_data[display_columns])
 
 
-st.sidebar.markdown("---")
-st.sidebar.markdown(
+st.markdown("---")
+st.markdown(
     """
 [<img src='https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png' class='img-fluid' width=50 height=50>]
 (https://github.com/rsglick/covid19_dashboard) <small> Dashboard Beta </small>""",
